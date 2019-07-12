@@ -1,26 +1,24 @@
-[![Express Logo](https://i.cloudup.com/zfY6lL7eFa-3000x3000.png)](http://expressjs.com/)
+# PropulsionJS-generator
+PropulsionJS' application generator
 
-[Express'](https://www.npmjs.com/package/express) application generator.
+[PropulsionJS'](https://www.npmjs.com/package/propulsionjs) project generator and bundle generator.
 
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Linux Build][travis-image]][travis-url]
-[![Windows Build][appveyor-image]][appveyor-url]
 
 ## Installation
 
 ```sh
-$ npm install -g express-generator
+$ npm install -g propulsionjs-generator
 ```
 
 ## Quick Start
 
-The quickest way to get started with express is to utilize the executable `express(1)` to generate an application as shown below:
-
 Create the app:
 
 ```bash
-$ express --view=hbs /tmp/foo && cd /tmp/foo
+$ express --view=hbs myApp && cd myApp
 ```
 
 Install dependencies:
@@ -44,22 +42,28 @@ This generator can also be further configured with the following command line fl
         --pug            add pug engine support
         --hbs            add handlebars engine support
     -H, --hogan          add hogan.js engine support
-    -v, --view <engine>  add view <engine> support (dust|ejs|hbs|hjs|jade|pug|twig|vash) (defaults to jade)
+    -v, --view <engine>  add view <engine> supported by consolidate.js, see the README (defaults to nunjucks)
         --no-view        use static html instead of view engine
     -c, --css <engine>   add stylesheet <engine> support (less|stylus|compass|sass) (defaults to plain css)
         --git            add .gitignore
     -f, --force          force on non-empty directory
     -h, --help           output usage information
 
+## Supported template engines
+
+By default, PropulsionJS uses [consolidate.js](https://github.com/tj/consolidate.js/) because some template engines need code support to be used with `app.engine`. You can disable consolidate.js manually with template engines which are supported with express (like: dust|ejs|hbs|hjs|jade|pug|twig|vash).
+
+See: [List (table) of supported template engines with consolidate.js](https://github.com/tj/consolidate.js#supported-template-engines)
+
 ## License
+
+This project is a fork of [express-generator](https://github.com/expressjs/generator).
 
 [MIT](LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/express-generator.svg
-[npm-url]: https://npmjs.org/package/express-generator
-[travis-image]: https://img.shields.io/travis/expressjs/generator/master.svg?label=linux
-[travis-url]: https://travis-ci.org/expressjs/generator
-[appveyor-image]: https://img.shields.io/appveyor/ci/dougwilson/generator/master.svg?label=windows
-[appveyor-url]: https://ci.appveyor.com/project/dougwilson/generator
-[downloads-image]: https://img.shields.io/npm/dm/express-generator.svg
-[downloads-url]: https://npmjs.org/package/express-generator
+[npm-image]: https://img.shields.io/npm/v/propulsionjs-generator.svg
+[npm-url]: https://npmjs.org/package/propulsionjs-generator
+[travis-image]: https://img.shields.io/travis/A-312/propulsionjs-generator/master.svg?label=linux
+[travis-url]: https://travis-ci.org/A-312/propulsionjs-generator
+[downloads-image]: https://img.shields.io/npm/dm/propulsionjs-generator.svg
+[downloads-url]: https://npmjs.org/package/propulsionjs-generator

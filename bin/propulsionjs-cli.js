@@ -9,6 +9,7 @@ var program = require('commander')
 var readline = require('readline')
 var sortedObject = require('sorted-object')
 var util = require('util')
+var consolidate = require('consolidate')
 
 var MODE_0666 = parseInt('0666', 8)
 var MODE_0755 = parseInt('0755', 8)
@@ -48,11 +49,15 @@ program
   .name('express')
   .version(VERSION, '    --version')
   .usage('[options] [dir]')
+  .usage('required:')
+  .option('    --make', 'choose to make a new `project` or a `bundle` (project|bundle)')
+  .usage('optional:')
+  .option('-e, --njk', 'add njk engine support (default)', renamedOption('--njk', '--view=nunjucks'))
   .option('-e, --ejs', 'add ejs engine support', renamedOption('--ejs', '--view=ejs'))
   .option('    --pug', 'add pug engine support', renamedOption('--pug', '--view=pug'))
   .option('    --hbs', 'add handlebars engine support', renamedOption('--hbs', '--view=hbs'))
   .option('-H, --hogan', 'add hogan.js engine support', renamedOption('--hogan', '--view=hogan'))
-  .option('-v, --view <engine>', 'add view <engine> support (dust|ejs|hbs|hjs|jade|pug|twig|vash) (defaults to jade)')
+  .option('-v, --view <engine>', 'add view <engine> support (supported by consolidate.js (see the README) or express like: ejs|hbs|hjs|pug|twig|vash) (defaults to nunjucks)')
   .option('    --no-view', 'use static html instead of view engine')
   .option('-c, --css <engine>', 'add stylesheet <engine> support (less|stylus|compass|sass) (defaults to plain css)')
   .option('    --git', 'add .gitignore')
@@ -139,10 +144,11 @@ function createApplication (name, dir) {
   // Package
   var pkg = {
     name: name,
+    description: "Project with propulsionJS",
     version: '0.0.0',
     private: true,
     scripts: {
-      start: 'node ./bin/www'
+      start: 'node index.js'
     },
     dependencies: {
       'debug': '~2.6.9',
@@ -152,13 +158,14 @@ function createApplication (name, dir) {
 
   // JavaScript
   var app = loadTemplate('js/app.js')
-  var www = loadTemplate('js/www')
 
-  // App name
-  www.locals.name = name
+  // config default.yml
+  mkdir(dir, 'config')
+  var configyml = loadTemplate('yaml/default.yml')
+  configyml.locals.name = name
+  configyml.locals.modules = Object.create(null)
 
   // App modules
-  app.locals.localModules = Object.create(null)
   app.locals.modules = Object.create(null)
   app.locals.mounts = []
   app.locals.uses = []
@@ -214,9 +221,6 @@ function createApplication (name, dir) {
     mkdir(dir, 'views')
     pkg.dependencies['http-errors'] = '~1.6.3'
     switch (program.view) {
-      case 'dust':
-        copyTemplateMulti('views', dir + '/views', '*.dust')
-        break
       case 'ejs':
         copyTemplateMulti('views', dir + '/views', '*.ejs')
         break
@@ -225,9 +229,6 @@ function createApplication (name, dir) {
         break
       case 'hjs':
         copyTemplateMulti('views', dir + '/views', '*.hjs')
-        break
-      case 'jade':
-        copyTemplateMulti('views', dir + '/views', '*.jade')
         break
       case 'pug':
         copyTemplateMulti('views', dir + '/views', '*.pug')
@@ -238,6 +239,8 @@ function createApplication (name, dir) {
       case 'vash':
         copyTemplateMulti('views', dir + '/views', '*.vash')
         break
+      default:
+        copyTemplate('js/index.html', path.join(dir, 'public/index.html'))
     }
   } else {
     // Copy extra public files
@@ -247,76 +250,77 @@ function createApplication (name, dir) {
   // CSS Engine support
   switch (program.css) {
     case 'compass':
-      app.locals.modules.compass = 'node-compass'
-      app.locals.uses.push("compass({ mode: 'expanded' })")
+      configyml.locals.modules.compass = 'node-compass'
+      configyml.locals.css = { engine : 'compass' }
       pkg.dependencies['node-compass'] = '0.2.3'
       break
     case 'less':
-      app.locals.modules.lessMiddleware = 'less-middleware'
-      app.locals.uses.push("lessMiddleware(path.join(__dirname, 'public'))")
+      configyml.locals.modules.lessMiddleware = 'less-middleware'
+      configyml.locals.css = { engine : 'less' } 
       pkg.dependencies['less-middleware'] = '~2.2.1'
       break
     case 'sass':
-      app.locals.modules.sassMiddleware = 'node-sass-middleware'
-      app.locals.uses.push("sassMiddleware({\n  src: path.join(__dirname, 'public'),\n  dest: path.join(__dirname, 'public'),\n  indentedSyntax: true, // true = .sass and false = .scss\n  sourceMap: true\n})")
+      configyml.locals.modules.sassMiddleware = 'node-sass-middleware'
+      configyml.locals.css = { engine : 'sass' } 
       pkg.dependencies['node-sass-middleware'] = '0.11.0'
       break
     case 'stylus':
-      app.locals.modules.stylus = 'stylus'
-      app.locals.uses.push("stylus.middleware(path.join(__dirname, 'public'))")
+      configyml.locals.modules.stylus = { engine : 'stylus' }
       pkg.dependencies['stylus'] = '0.54.5'
       break
   }
 
-  // Index router mount
-  app.locals.localModules.indexRouter = './routes/index'
-  app.locals.mounts.push({ path: '/', code: 'indexRouter' })
-
-  // User router mount
-  app.locals.localModules.usersRouter = './routes/users'
-  app.locals.mounts.push({ path: '/users', code: 'usersRouter' })
+  var needTemplateInstall = false
 
   // Template support
   switch (program.view) {
-    case 'dust':
-      app.locals.modules.adaro = 'adaro'
-      app.locals.view = {
-        engine: 'dust',
-        render: 'adaro.dust()'
-      }
-      pkg.dependencies.adaro = '~1.0.4'
-      break
     case 'ejs':
-      app.locals.view = { engine: 'ejs' }
+      configyml.locals.view = { engine: 'ejs' }
       pkg.dependencies.ejs = '~2.6.1'
       break
     case 'hbs':
-      app.locals.view = { engine: 'hbs' }
+      configyml.locals.view = { engine: 'hbs' }
       pkg.dependencies.hbs = '~4.0.4'
       break
     case 'hjs':
-      app.locals.view = { engine: 'hjs' }
+      configyml.locals.view = { engine: 'hjs' }
       pkg.dependencies.hjs = '~0.0.6'
       break
-    case 'jade':
-      app.locals.view = { engine: 'jade' }
-      pkg.dependencies.jade = '~1.11.0'
-      break
     case 'pug':
-      app.locals.view = { engine: 'pug' }
+      configyml.locals.view = { engine: 'pug' }
       pkg.dependencies.pug = '2.0.0-beta11'
       break
     case 'twig':
-      app.locals.view = { engine: 'twig' }
+      configyml.locals.view = { engine: 'twig' }
       pkg.dependencies.twig = '~0.10.3'
       break
     case 'vash':
-      app.locals.view = { engine: 'vash' }
+      configyml.locals.view = { engine: 'vash' }
       pkg.dependencies.vash = '~0.12.6'
       break
-    default:
-      app.locals.view = false
+    case 'njk':
+    case 'nunjucks':
+      configyml.locals.view = {
+        engine: 'nunjucks',
+        ext: 'njk'
+      }
+      pkg.dependencies.nunjucks = '~3.2.0'
+      pkg.dependencies.consolidate = '~0.15.1'
+      configyml.locals.consolidate = true
       break
+    default:
+      configyml.locals.view = false
+
+      if (program.view && consolidate[program.view]) {
+        configyml.locals.view = {
+          engine: program.view
+        }
+        pkg.dependencies.consolidate = '~0.15.1'
+        configyml.locals.consolidate = true
+        needTemplateInstall = true
+      } else if (program.view) {
+        warning(program.view + ' template engine are not available with consolidate.js ! Check the name in the README of consolidate.js.')
+      }
   }
 
   // Static files
@@ -330,10 +334,9 @@ function createApplication (name, dir) {
   pkg.dependencies = sortedObject(pkg.dependencies)
 
   // write files
+  write(path.join(dir, 'config/default.yml'), configyml.render())
   write(path.join(dir, 'app.js'), app.render())
   write(path.join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n')
-  mkdir(dir, 'bin')
-  write(path.join(dir, 'bin/www'), www.render(), MODE_0755)
 
   var prompt = launchedFromCmd() ? '>' : '$'
 
@@ -346,6 +349,13 @@ function createApplication (name, dir) {
   console.log()
   console.log('   install dependencies:')
   console.log('     %s npm install', prompt)
+
+  if (needTemplateInstall) {
+    console.log()
+    console.log('   install template engine:')
+    console.log('     %s npm install {package-name}', prompt)
+  }
+
   console.log()
   console.log('   run the app:')
 
@@ -449,7 +459,7 @@ function main () {
   var destinationPath = program.args.shift() || '.'
 
   // App name
-  var appName = createAppName(path.resolve(destinationPath)) || 'hello-world'
+  var appName = createAppName(path.resolve(destinationPath)) || 'new-project-propulsionjs'
 
   // View engine
   if (program.view === true) {
@@ -457,13 +467,12 @@ function main () {
     if (program.hbs) program.view = 'hbs'
     if (program.hogan) program.view = 'hjs'
     if (program.pug) program.view = 'pug'
+    if (program.nunjucks) program.view = 'njk'
   }
 
-  // Default view engine
+  // Default view engine : nunjucks
   if (program.view === true) {
-    warning('the default view engine will not be jade in future releases\n' +
-      "use `--view=jade' or `--help' for additional options")
-    program.view = 'jade'
+    program.view = 'njk'
   }
 
   // Generate application

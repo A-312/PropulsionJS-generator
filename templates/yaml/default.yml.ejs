@@ -1,0 +1,26 @@
+http:
+  port: 3000
+
+appName: <%- view.engine %>
+
+framework: 
+  templating:
+<% if (view) { -%>
+    default: html
+    engines:
+      - name: <%- view.engine %>
+        ext: <%- view.ext %>
+        <% if (view.consolidate) { -%>
+        consolidate: true
+        <% } -%>
+<% } else { -%>
+    default: html
+    engines: []
+<% } -%>
+
+<% if (css) { -%>
+  css:
+    engines:
+      - name: <%- css.engine %>
+        options: {}
+<% } -%>

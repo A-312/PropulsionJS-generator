@@ -37,10 +37,6 @@ describe('express(1)', function () {
       })
     })
 
-    it('should print jade view warning', function () {
-      assert.strictEqual(ctx.stderr, "\n  warning: the default view engine will not be jade in future releases\n  warning: use `--view=jade' or `--help' for additional options\n\n")
-    })
-
     it('should provide debug instructions', function () {
       assert.ok(/DEBUG=express-1-no-args:\* (?:& )?npm start/.test(ctx.stdout))
     })
@@ -51,10 +47,10 @@ describe('express(1)', function () {
       assert.notStrictEqual(ctx.files.indexOf('package.json'), -1)
     })
 
-    it('should have jade templates', function () {
-      assert.notStrictEqual(ctx.files.indexOf('views/error.jade'), -1)
-      assert.notStrictEqual(ctx.files.indexOf('views/index.jade'), -1)
-      assert.notStrictEqual(ctx.files.indexOf('views/layout.jade'), -1)
+    it('should have njk templates', function () {
+      assert.notStrictEqual(ctx.files.indexOf('views/error.njk'), -1)
+      assert.notStrictEqual(ctx.files.indexOf('views/index.njk'), -1)
+      assert.notStrictEqual(ctx.files.indexOf('views/layout.njk'), -1)
     })
 
     it('should have a package.json file', function () {
@@ -72,7 +68,8 @@ describe('express(1)', function () {
         '    "debug": "~2.6.9",\n' +
         '    "express": "~4.16.1",\n' +
         '    "http-errors": "~1.6.3",\n' +
-        '    "jade": "~1.11.0",\n' +
+        '    "njk": "~3.2.0",\n' +
+        '    "consolidate": "~0.15.1",\n' +
         '    "morgan": "~1.9.1"\n' +
         '  }\n' +
         '}\n')
@@ -149,12 +146,12 @@ describe('express(1)', function () {
         })
       })
 
-      it('should default to name "hello-world"', function () {
+      it('should default to name "new-project-propulsionjs"', function () {
         var file = path.resolve(ctx1.dir, 'package.json')
         var contents = fs.readFileSync(file, 'utf8')
         var name = JSON.parse(contents).name
         assert.ok(validateNpmName(name).validForNewPackages)
-        assert.strictEqual(name, 'hello-world')
+        assert.strictEqual(name, 'new-project-propulsionjs')
       })
     })
   })
@@ -222,10 +219,10 @@ describe('express(1)', function () {
       assert.notStrictEqual(ctx.files.indexOf('foo/package.json'), -1)
     })
 
-    it('should have jade templates', function () {
-      assert.notStrictEqual(ctx.files.indexOf('foo/views/error.jade'), -1)
-      assert.notStrictEqual(ctx.files.indexOf('foo/views/index.jade'), -1)
-      assert.notStrictEqual(ctx.files.indexOf('foo/views/layout.jade'), -1)
+    it('should have njk templates', function () {
+      assert.notStrictEqual(ctx.files.indexOf('foo/views/error.njk'), -1)
+      assert.notStrictEqual(ctx.files.indexOf('foo/views/index.njk'), -1)
+      assert.notStrictEqual(ctx.files.indexOf('foo/views/layout.njk'), -1)
     })
   })
 
@@ -696,11 +693,11 @@ describe('express(1)', function () {
       })
     })
 
-    describe('dust', function () {
+    describe('nunjucks', function () {
       var ctx = setupTestEnvironment(this.fullTitle())
 
-      it('should create basic app with dust templates', function (done) {
-        run(ctx.dir, ['--view', 'dust'], function (err, stdout) {
+      it('should create basic app with nunjucks templates', function (done) {
+        run(ctx.dir, ['--view', 'nunjucks'], function (err, stdout) {
           if (err) return done(err)
           ctx.files = utils.parseCreatedFiles(stdout, ctx.dir)
           assert.strictEqual(ctx.files.length, 15, 'should have 15 files')
@@ -714,9 +711,9 @@ describe('express(1)', function () {
         assert.notStrictEqual(ctx.files.indexOf('package.json'), -1, 'should have package.json file')
       })
 
-      it('should have dust templates', function () {
-        assert.notStrictEqual(ctx.files.indexOf('views/error.dust'), -1, 'should have views/error.dust file')
-        assert.notStrictEqual(ctx.files.indexOf('views/index.dust'), -1, 'should have views/index.dust file')
+      it('should have nunjucks templates', function () {
+        assert.notStrictEqual(ctx.files.indexOf('views/error.njs'), -1, 'should have views/error.njs file')
+        assert.notStrictEqual(ctx.files.indexOf('views/index.njs'), -1, 'should have views/index.njs file')
       })
 
       it('should have installable dependencies', function (done) {
