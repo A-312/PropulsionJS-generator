@@ -13,7 +13,7 @@ var validateNpmName = require('validate-npm-package-name')
 
 var APP_START_STOP_TIMEOUT = 10000
 var PKG_PATH = path.resolve(__dirname, '..', 'package.json')
-var BIN_PATH = path.resolve(path.dirname(PKG_PATH), require(PKG_PATH).bin.express)
+var BIN_PATH = path.resolve(path.dirname(PKG_PATH), require(PKG_PATH).bin["propulsionjs-generator"])
 var NPM_INSTALL_TIMEOUT = 300000 // 5 minutes
 var TEMP_DIR = utils.tmpDir()
 
