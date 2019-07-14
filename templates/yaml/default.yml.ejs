@@ -10,9 +10,9 @@ framework:
     engines:
       - name: <%- view.engine %>
         ext: <%- view.ext %>
-        <% if (view.consolidate) { -%>
+<% if (view.consolidate) { -%>
         consolidate: true
-        <% } -%>
+<% } -%>
 <% } else { -%>
     default: html
     engines: []

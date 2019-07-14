@@ -302,21 +302,21 @@ function createApplication (name, dir) {
     case 'nunjucks':
       configyml.locals.view = {
         engine: 'nunjucks',
-        ext: 'njk'
+        ext: 'njk',
+        consolidate: true
       }
       pkg.dependencies.nunjucks = '~3.2.0'
       pkg.dependencies.consolidate = '~0.15.1'
-      configyml.locals.consolidate = true
       break
     default:
       configyml.locals.view = false
 
       if (program.view && consolidate[program.view]) {
         configyml.locals.view = {
-          engine: program.view
+          engine: program.view,
+          consolidate: true
         }
         pkg.dependencies.consolidate = '~0.15.1'
-        configyml.locals.consolidate = true
         needTemplateInstall = true
       } else if (program.view) {
         warning(program.view + ' template engine are not available with consolidate.js ! Check the name in the README of consolidate.js.')
