@@ -17,7 +17,7 @@ var BIN_PATH = path.resolve(path.dirname(PKG_PATH), require(PKG_PATH).bin["propu
 var NPM_INSTALL_TIMEOUT = 300000 // 5 minutes
 var TEMP_DIR = utils.tmpDir()
 
-describe('express(1)', function () {
+describe('propulsionjs(1)', function () {
   after(function (done) {
     this.timeout(30000)
     rimraf(TEMP_DIR, done)
@@ -38,7 +38,7 @@ describe('express(1)', function () {
     })
 
     it('should provide debug instructions', function () {
-      assert.ok(/DEBUG=express-1-no-args:\* (?:& )?npm start/.test(ctx.stdout))
+      assert.ok(/DEBUG=propulsionjs-1-no-args:\* (?:& )?npm start/.test(ctx.stdout))
     })
 
     it('should have basic files', function () {
@@ -57,20 +57,17 @@ describe('express(1)', function () {
       var file = path.resolve(ctx.dir, 'package.json')
       var contents = fs.readFileSync(file, 'utf8')
       assert.strictEqual(contents, '{\n' +
-        '  "name": "express-1-no-args",\n' +
+        '  "name": "propulsionjs-1-no-args",\n' +
         '  "version": "0.0.0",\n' +
         '  "private": true,\n' +
         '  "scripts": {\n' +
         '    "start": "node ./bin/www"\n' +
         '  },\n' +
         '  "dependencies": {\n' +
-        '    "cookie-parser": "~1.4.4",\n' +
-        '    "debug": "~2.6.9",\n' +
-        '    "express": "~4.16.1",\n' +
-        '    "http-errors": "~1.6.3",\n' +
-        '    "njk": "~3.2.0",\n' +
         '    "consolidate": "~0.15.1",\n' +
-        '    "morgan": "~1.9.1"\n' +
+        '    "debug": "~2.6.9",\n' +
+        '    "nunjucks": "~3.2.0",\n' +
+        '    "propulsionJS": "*"\n' +
         '  }\n' +
         '}\n')
     })
@@ -80,7 +77,7 @@ describe('express(1)', function () {
       npmInstall(ctx.dir, done)
     })
 
-    it('should export an express app from app.js', function () {
+    it('should export an propulsionjs app from app.js', function () {
       var file = path.resolve(ctx.dir, 'app.js')
       var app = require(file)
       assert.strictEqual(typeof app, 'function')
@@ -105,7 +102,7 @@ describe('express(1)', function () {
       it('should respond to HTTP request', function (done) {
         request(this.app)
           .get('/')
-          .expect(200, /<title>Express<\/title>/, done)
+          .expect(200, /<title>PropulsionJS<\/title>/, done)
       })
 
       it('should generate a 404', function (done) {
@@ -170,7 +167,7 @@ describe('express(1)', function () {
     it('should print usage', function (done) {
       runRaw(ctx.dir, ['--foo'], function (err, code, stdout, stderr) {
         if (err) return done(err)
-        assert.ok(/Usage: express /.test(stdout))
+        assert.ok(/Usage: propulsionjs /.test(stdout))
         assert.ok(/--help/.test(stdout))
         assert.ok(/--version/.test(stdout))
         assert.ok(/error: unknown option/.test(stderr))
@@ -241,7 +238,7 @@ describe('express(1)', function () {
       it('should print usage', function (done) {
         runRaw(ctx.dir, ['--css'], function (err, code, stdout) {
           if (err) return done(err)
-          assert.ok(/Usage: express /.test(stdout))
+          assert.ok(/Usage: propulsionjs /.test(stdout))
           assert.ok(/--help/.test(stdout))
           assert.ok(/--version/.test(stdout))
           done()
@@ -302,7 +299,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should respond with stylesheet', function (done) {
@@ -358,7 +355,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should respond with stylesheet', function (done) {
@@ -414,7 +411,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should respond with stylesheet', function (done) {
@@ -487,7 +484,7 @@ describe('express(1)', function () {
         if (err) return done(err)
         var files = utils.parseCreatedFiles(stdout, ctx.dir)
         assert.strictEqual(files.length, 0)
-        assert.ok(/Usage: express /.test(stdout))
+        assert.ok(/Usage: propulsionjs /.test(stdout))
         assert.ok(/--help/.test(stdout))
         assert.ok(/--version/.test(stdout))
         done()
@@ -535,7 +532,7 @@ describe('express(1)', function () {
         if (err) return done(err)
         var files = utils.parseCreatedFiles(stdout, ctx.dir)
         assert.strictEqual(files.length, 0)
-        assert.ok(/Usage: express /.test(stdout))
+        assert.ok(/Usage: propulsionjs /.test(stdout))
         assert.ok(/--help/.test(stdout))
         assert.ok(/--version/.test(stdout))
         done()
@@ -619,7 +616,7 @@ describe('express(1)', function () {
       it('should respond to HTTP request', function (done) {
         request(this.app)
           .get('/')
-          .expect(200, /<title>Express<\/title>/, done)
+          .expect(200, /<title>PropulsionJS<\/title>/, done)
       })
 
       it('should generate a 404', function (done) {
@@ -677,7 +674,7 @@ describe('express(1)', function () {
       it('should print usage', function (done) {
         runRaw(ctx.dir, ['--view'], function (err, code, stdout) {
           if (err) return done(err)
-          assert.ok(/Usage: express /.test(stdout))
+          assert.ok(/Usage: propulsionjs /.test(stdout))
           assert.ok(/--help/.test(stdout))
           assert.ok(/--version/.test(stdout))
           done()
@@ -739,7 +736,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {
@@ -796,7 +793,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {
@@ -861,7 +858,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {
@@ -925,7 +922,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {
@@ -990,7 +987,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {
@@ -1055,7 +1052,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {
@@ -1120,7 +1117,7 @@ describe('express(1)', function () {
         it('should respond to HTTP request', function (done) {
           request(this.app)
             .get('/')
-            .expect(200, /<title>Express<\/title>/, done)
+            .expect(200, /<title>PropulsionJS<\/title>/, done)
         })
 
         it('should generate a 404', function (done) {

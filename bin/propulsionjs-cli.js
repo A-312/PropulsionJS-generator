@@ -46,7 +46,7 @@ before(program, 'unknownOption', function () {
 })
 
 program
-  .name('express')
+  .name('propulsionjs')
   .version(VERSION, '    --version')
   .usage('[options] [dir]')
   .usage('required:')
@@ -57,7 +57,7 @@ program
   .option('    --pug', 'add pug engine support', renamedOption('--pug', '--view=pug'))
   .option('    --hbs', 'add handlebars engine support', renamedOption('--hbs', '--view=hbs'))
   .option('-H, --hogan', 'add hogan.js engine support', renamedOption('--hogan', '--view=hogan'))
-  .option('-v, --view <engine>', 'add view <engine> support (supported by consolidate.js (see the README) or express like: ejs|hbs|hjs|pug|twig|vash) (defaults to nunjucks)')
+  .option('-v, --view <engine>', 'add view <engine> supported by consolidate.js (read the README) or directly supported by express (ejs|hbs|hjs|pug|twig|vash) (defaults to nunjucks)')
   .option('    --no-view', 'use static html instead of view engine')
   .option('-c, --css <engine>', 'add stylesheet <engine> support (less|stylus|compass|sass) (defaults to plain css)')
   .option('    --git', 'add .gitignore')
@@ -152,37 +152,15 @@ function createApplication (name, dir) {
     },
     dependencies: {
       'debug': '~2.6.9',
-      'express': '~4.16.1'
+      'propulsionJS': '*'
     }
   }
-
-  // JavaScript
-  var app = loadTemplate('js/app.js')
 
   // config default.yml
   mkdir(dir, 'config')
   var configyml = loadTemplate('yaml/default.yml')
   configyml.locals.name = name
   configyml.locals.modules = Object.create(null)
-
-  // App modules
-  app.locals.modules = Object.create(null)
-  app.locals.mounts = []
-  app.locals.uses = []
-
-  // Request logger
-  app.locals.modules.logger = 'morgan'
-  app.locals.uses.push("logger('dev')")
-  pkg.dependencies.morgan = '~1.9.1'
-
-  // Body parsers
-  app.locals.uses.push('express.json()')
-  app.locals.uses.push('express.urlencoded({ extended: false })')
-
-  // Cookie parser
-  app.locals.modules.cookieParser = 'cookie-parser'
-  app.locals.uses.push('cookieParser()')
-  pkg.dependencies['cookie-parser'] = '~1.4.4'
 
   if (dir !== '.') {
     mkdir(dir, '.')
@@ -219,7 +197,6 @@ function createApplication (name, dir) {
   if (program.view) {
     // Copy view templates
     mkdir(dir, 'views')
-    pkg.dependencies['http-errors'] = '~1.6.3'
     switch (program.view) {
       case 'ejs':
         copyTemplateMulti('views', dir + '/views', '*.ejs')
@@ -322,9 +299,6 @@ function createApplication (name, dir) {
       }
   }
 
-  // Static files
-  app.locals.uses.push("express.static(path.join(__dirname, 'public'))")
-
   if (program.git) {
     copyTemplate('js/gitignore', path.join(dir, '.gitignore'))
   }
@@ -334,7 +308,6 @@ function createApplication (name, dir) {
 
   // write files
   write(path.join(dir, 'config/default.yml'), configyml.render())
-  write(path.join(dir, 'app.js'), app.render())
   write(path.join(dir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n')
 
   var prompt = launchedFromCmd() ? '>' : '$'
