@@ -250,24 +250,23 @@ function createApplication (name, dir) {
   // CSS Engine support
   switch (program.css) {
     case 'compass':
-      configyml.locals.modules.compass = 'node-compass'
       configyml.locals.css = { engine : 'compass' }
       pkg.dependencies['node-compass'] = '0.2.3'
       break
     case 'less':
-      configyml.locals.modules.lessMiddleware = 'less-middleware'
       configyml.locals.css = { engine : 'less' } 
       pkg.dependencies['less-middleware'] = '~2.2.1'
       break
     case 'sass':
-      configyml.locals.modules.sassMiddleware = 'node-sass-middleware'
       configyml.locals.css = { engine : 'sass' } 
       pkg.dependencies['node-sass-middleware'] = '0.11.0'
       break
     case 'stylus':
-      configyml.locals.modules.stylus = { engine : 'stylus' }
+      configyml.locals.css = { engine : 'stylus' }
       pkg.dependencies['stylus'] = '0.54.5'
       break
+    default:
+      configyml.locals.css = false
   }
 
   var needTemplateInstall = false
